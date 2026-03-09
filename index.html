@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contador de Magias</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0a14;
+    --surface: #16111f;
+    --border: #2e1f4a;
+    --accent: #7c3aed;
+    --accent2: #a855f7;
+    --glow: #b57bff;
+    --danger: #e05252;
+    --gold: #c9a84c;
+    --gold2: #f0cc6e;
+    --text: #e8deff;
+    --muted: #7a6b99;
+    --green: #4ade80;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Crimson Text', serif;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(124,58,237,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(168,85,247,0.08) 0%, transparent 50%);
+  }
+
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+    position: relative;
+  }
+
+  .header::before {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold));
+    margin: 0 auto 12px;
+  }
+
+  .header::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(to left, transparent, var(--gold));
+    margin: 12px auto 0;
+  }
+
+  .header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--gold2);
+    text-shadow: 0 0 20px rgba(201,168,76,0.4);
+    text-transform: uppercase;
+  }
+
+  .header p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* TURN COUNTER */
+  .turn-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .turn-bar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--accent2), transparent);
+  }
+
+  .turn-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .turn-number {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--glow);
+    text-shadow: 0 0 16px rgba(181,123,255,0.6);
+    line-height: 1;
+  }
+
+  .turn-number span {
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .btn-next {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    padding: 10px 18px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    box-shadow: 0 0 16px rgba(124,58,237,0.4);
+  }
+
+  .btn-next:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 24px rgba(124,58,237,0.6);
+  }
+
+  .btn-next:active { transform: translateY(0); }
+
+  /* ADD SPELL FORM */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .form-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .form-row.single { grid-template-columns: 1fr; }
+
+  input[type="text"], input[type="number"], select {
+    background: rgba(13,10,20,0.8);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Crimson Text', serif;
+    font-size: 1rem;
+    padding: 8px 12px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus, select:focus { border-color: var(--accent2); }
+  input::placeholder { color: var(--muted); }
+
+  select option { background: #1a1228; }
+
+  .form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .btn-add {
+    flex: 1;
+    background: linear-gradient(135deg, #1e3a2f, #2d5a42);
+    border: 1px solid #3d7a55;
+    border-radius: 6px;
+    color: var(--green);
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    padding: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .btn-add:hover { background: linear-gradient(135deg, #2a4d3e, #3d6e52); border-color: var(--green); }
+
+  .btn-clear-form {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-clear-form:hover { border-color: var(--muted); color: var(--text); }
+
+  /* SPELL LIST */
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .spell-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .spell-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease;
+    transition: border-color 0.3s;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .spell-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 10px 0 0 10px;
+    background: var(--accent2);
+  }
+
+  .spell-card.urgent::before { background: var(--danger); }
+  .spell-card.urgent { border-color: rgba(224,82,82,0.3); }
+  .spell-card.expiring::before { background: var(--gold); }
+  .spell-card.expiring { border-color: rgba(201,168,76,0.3); }
+  .spell-card.concentration::before { background: #60a5fa; }
+
+  .spell-info { min-width: 0; }
+
+  .spell-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+
+  .spell-meta {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .spell-caster { font-style: italic; }
+
+  .badge {
+    font-size: 0.65rem;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.05em;
+    padding: 1px 6px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    border: 1px solid;
+  }
+
+  .badge-conc { color: #60a5fa; border-color: rgba(96,165,250,0.4); background: rgba(96,165,250,0.08); }
+  .badge-dm { color: var(--gold); border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.08); }
+
+  .spell-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .turns-display {
+    text-align: center;
+    min-width: 52px;
+  }
+
+  .turns-number {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--glow);
+    text-shadow: 0 0 10px rgba(181,123,255,0.5);
+    transition: color 0.3s, text-shadow 0.3s;
+  }
+
+  .spell-card.urgent .turns-number { color: var(--danger); text-shadow: 0 0 10px rgba(224,82,82,0.5); }
+  .spell-card.expiring .turns-number { color: var(--gold2); text-shadow: 0 0 10px rgba(201,168,76,0.5); }
+
+  .turns-label {
+    font-size: 0.6rem;
+    color: var(--muted);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+
+  .btn-remove {
+    background: transparent;
+    border: 1px solid rgba(224,82,82,0.3);
+    border-radius: 6px;
+    color: rgba(224,82,82,0.5);
+    cursor: pointer;
+    font-size: 1rem;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .btn-remove:hover { color: var(--danger); border-color: var(--danger); background: rgba(224,82,82,0.1); }
+
+  /* EXPIRED */
+  .expired-section { margin-top: 20px; }
+
+  .expired-card {
+    background: rgba(13,10,20,0.5);
+    border: 1px solid rgba(46,31,74,0.4);
+    border-radius: 8px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    opacity: 0.5;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .expired-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+
+  .expired-meta { font-size: 0.8rem; color: var(--muted); font-style: italic; }
+
+  /* EMPTY STATE */
+  .empty {
+    text-align: center;
+    padding: 30px;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 0.95rem;
+    border: 1px dashed rgba(46,31,74,0.5);
+    border-radius: 10px;
+  }
+
+  /* PULSE ANIMATION */
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(224,82,82,0); }
+    50% { box-shadow: 0 0 0 4px rgba(224,82,82,0.15); }
+  }
+
+  .spell-card.urgent { animation: fadeIn 0.3s ease, pulse-glow 2s ease-in-out infinite; }
+
+  /* RESET BTN */
+  .footer {
+    text-align: center;
+    margin-top: 24px;
+  }
+
+  .btn-reset {
+    background: transparent;
+    border: 1px solid rgba(46,31,74,0.6);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    padding: 8px 16px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .btn-reset:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* CHECKBOX */
+  .check-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .check-row label { font-size: 0.9rem; color: var(--muted); cursor: pointer; user-select: none; }
+
+  input[type="checkbox"] {
+    accent-color: #60a5fa;
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--glow);
+    z-index: 999;
+    transition: transform 0.3s ease;
+    pointer-events: none;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(124,58,237,0.3);
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>✦ Magias Ativas ✦</h1>
+    <p>Controle de duração por turnos</p>
+  </div>
+
+  <!-- TURN COUNTER -->
+  <div class="turn-bar">
+    <div>
+      <div class="turn-label">Turno atual</div>
+      <div class="turn-number" id="turnDisplay">1 <span>/ rodada</span></div>
+    </div>
+    <button class="btn-next" onclick="nextTurn()">⟶ Próximo Turno</button>
+  </div>
+
+  <!-- ADD SPELL FORM -->
+  <div class="form-card">
+    <div class="form-title">✧ Adicionar Magia</div>
+    <div class="form-row">
+      <input type="text" id="spellName" placeholder="Nome da magia" />
+      <input type="text" id="casterName" placeholder="Lançador" />
+    </div>
+    <div class="form-row">
+      <input type="number" id="spellDuration" placeholder="Duração (turnos)" min="1" value="3" />
+      <select id="spellType">
+        <option value="normal">Magia comum</option>
+        <option value="concentration">Concentração</option>
+        <option value="dm">Efeito do Mestre</option>
+      </select>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="countFromNow" checked />
+      <label for="countFromNow">Começa a contar a partir do turno atual</label>
+    </div>
+    <div class="form-actions">
+      <button class="btn-add" onclick="addSpell()">＋ Adicionar</button>
+      <button class="btn-clear-form" onclick="clearForm()">Limpar</button>
+    </div>
+  </div>
+
+  <!-- ACTIVE SPELLS -->
+  <div class="section-title">Efeitos ativos</div>
+  <div class="spell-list" id="spellList">
+    <div class="empty" id="emptyMsg">Nenhuma magia ativa no momento.</div>
+  </div>
+
+  <!-- EXPIRED -->
+  <div class="expired-section" id="expiredSection" style="display:none">
+    <div class="section-title" style="margin-top:16px">Expiradas (último turno)</div>
+    <div id="expiredList"></div>
+  </div>
+
+  <div class="footer">
+    <button class="btn-reset" onclick="resetAll()">⊘ Zerar tudo</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let turn = 1;
+  let spells = [];
+  let expiredSpells = [];
+  let idCounter = 0;
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function addSpell() {
+    const name = document.getElementById('spellName').value.trim();
+    const caster = document.getElementById('casterName').value.trim();
+    const duration = parseInt(document.getElementById('spellDuration').value);
+    const type = document.getElementById('spellType').value;
+    const fromNow = document.getElementById('countFromNow').checked;
+
+    if (!name) { showToast('Informe o nome da magia!'); return; }
+    if (!duration || duration < 1) { showToast('Duração inválida!'); return; }
+
+    const startTurn = fromNow ? turn : turn;
+    const spell = {
+      id: ++idCounter,
+      name,
+      caster: caster || '—',
+      duration,
+      remaining: duration,
+      type,
+      startTurn
+    };
+
+    spells.push(spell);
+    render();
+    showToast(`"${name}" adicionada!`);
+  }
+
+  function clearForm() {
+    document.getElementById('spellName').value = '';
+    document.getElementById('casterName').value = '';
+    document.getElementById('spellDuration').value = '3';
+    document.getElementById('spellType').value = 'normal';
+  }
+
+  function removeSpell(id) {
+    spells = spells.filter(s => s.id !== id);
+    render();
+  }
+
+  function nextTurn() {
+    turn++;
+    document.getElementById('turnDisplay').innerHTML = `${turn} <span>/ rodada</span>`;
+
+    const nowExpired = [];
+    spells.forEach(s => {
+      s.remaining--;
+      if (s.remaining <= 0) nowExpired.push(s);
+    });
+
+    if (nowExpired.length > 0) {
+      expiredSpells = nowExpired;
+      spells = spells.filter(s => s.remaining > 0);
+      nowExpired.forEach(s => showToast(`"${s.name}" expirou!`));
+    } else {
+      expiredSpells = [];
+    }
+
+    render();
+  }
+
+  function resetAll() {
+    if (!confirm('Zerar tudo? Todos os efeitos serão removidos.')) return;
+    turn = 1;
+    spells = [];
+    expiredSpells = [];
+    document.getElementById('turnDisplay').innerHTML = `1 <span>/ rodada</span>`;
+    render();
+  }
+
+  function render() {
+    const list = document.getElementById('spellList');
+    const empty = document.getElementById('emptyMsg');
+    const expSection = document.getElementById('expiredSection');
+    const expList = document.getElementById('expiredList');
+
+    // Active spells
+    if (spells.length === 0) {
+      list.innerHTML = '';
+      list.appendChild(empty);
+      empty.style.display = '';
+    } else {
+      empty.style.display = 'none';
+      list.innerHTML = '';
+      spells.forEach(s => {
+        let urgency = '';
+        if (s.remaining === 1) urgency = 'urgent';
+        else if (s.remaining === 2) urgency = 'expiring';
+        else if (s.type === 'concentration') urgency = 'concentration';
+
+        const typeLabel = s.type === 'concentration'
+          ? '<span class="badge badge-conc">Concentração</span>'
+          : s.type === 'dm'
+          ? '<span class="badge badge-dm">Mestre</span>'
+          : '';
+
+        const card = document.createElement('div');
+        card.className = `spell-card ${urgency}`;
+        card.innerHTML = `
+          <div class="spell-info">
+            <div class="spell-name">${escHtml(s.name)}</div>
+            <div class="spell-meta">
+              <span class="spell-caster">${escHtml(s.caster)}</span>
+              ${typeLabel}
+              <span>Início: T${s.startTurn}</span>
+            </div>
+          </div>
+          <div class="spell-right">
+            <div class="turns-display">
+              <div class="turns-number">${s.remaining}</div>
+              <div class="turns-label">turno${s.remaining !== 1 ? 's' : ''}</div>
+            </div>
+            <button class="btn-remove" onclick="removeSpell(${s.id})" title="Remover">✕</button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    // Expired
+    if (expiredSpells.length > 0) {
+      expSection.style.display = '';
+      expList.innerHTML = '';
+      expiredSpells.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'expired-card';
+        card.innerHTML = `
+          <div>
+            <div class="expired-name">${escHtml(s.name)}</div>
+            <div class="expired-meta">${escHtml(s.caster)} · ${s.duration} turno${s.duration !== 1 ? 's' : ''}</div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--muted);font-family:'Cinzel',serif">Expirou</div>
+        `;
+        expList.appendChild(card);
+      });
+    } else {
+      expSection.style.display = 'none';
+    }
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  render();
+</script>
+</body>
+</html>
